@@ -115,8 +115,11 @@ LABEL maintainer.0="João Fonseca (@joaopaulofonseca)" \
   maintainer.1="Pedro Branco (@pedrobranco)" \
   maintainer.2="Rui Marinho (@ruimarinho)"
 
-RUN addgroup bitcoin --gid ${GID} --system
-RUN adduser --uid ${UID} --system bitcoin --ingroup bitcoin
+ENV BITCOIN_UID=1001
+ENV BITCOIN_GID=1001
+
+RUN addgroup -g ${BITCOIN_GID} -S bitcoin\
+  && adduser -S -G bitcoin -u ${BITCOIN_UID} bitcoin
 RUN sed -i 's/http\:\/\/dl-cdn.alpinelinux.org/https\:\/\/alpine.global.ssl.fastly.net/g' /etc/apk/repositories
 RUN apk --no-cache add \
   boost-filesystem \
