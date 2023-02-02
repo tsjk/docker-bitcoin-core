@@ -120,14 +120,17 @@ RUN apk --no-cache add \
   boost-thread \
   libevent \
   libzmq \
-  shadow \
-  sqlite-dev \
-  su-exec
+  socat \
+  sudo \
+  tini
 
 ENV BITCOIN_DATA=/home/bitcoin/.bitcoin
 ENV BITCOIN_VERSION=22.0
 ENV BITCOIN_PREFIX=/opt/bitcoin-${BITCOIN_VERSION}
 ENV PATH=${BITCOIN_PREFIX}/bin:$PATH
+
+ENV TOR_SOCKSD=""
+ENV TOR_CTRLD=""
 
 COPY --from=bitcoin-core /opt /opt
 COPY docker-entrypoint.sh /entrypoint.sh
@@ -136,8 +139,8 @@ VOLUME ["/home/bitcoin/.bitcoin"]
 
 EXPOSE 8332 8333 18332 18333 18444
 
-ENTRYPOINT ["/entrypoint.sh"]
-
-RUN bitcoind -version | grep "Bitcoin Core version v${BITCOIN_VERSION}"
+ENTRYPOINT ["/sbin/tini", "--", "/entrypoint.sh"]
 
 CMD ["bitcoind"]
+
+RUN bitcoind -version | grep "Bitcoin Core version v${BITCOIN_VERSION}"
