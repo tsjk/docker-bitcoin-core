@@ -20,7 +20,7 @@ RUN mkdir -p ${BERKELEYDB_PREFIX}
 WORKDIR /${BERKELEYDB_VERSION}/build_unix
 
 RUN ../dist/configure --enable-cxx --disable-shared --with-pic --prefix=${BERKELEYDB_PREFIX}
-RUN make -j4
+RUN make -j$(nproc)
 RUN make install
 RUN rm -rf ${BERKELEYDB_PREFIX}/docs
 
@@ -97,7 +97,7 @@ RUN ./configure LDFLAGS=-L`ls -d /opt/db*`/lib/ CPPFLAGS=-I`ls -d /opt/db*`/incl
     --with-libs \
     --with-sqlite=yes \
     --with-daemon
-RUN make -j4
+RUN make -j$(nproc)
 RUN make install
 RUN strip ${BITCOIN_PREFIX}/bin/bitcoin-cli
 RUN strip ${BITCOIN_PREFIX}/bin/bitcoin-tx
