@@ -95,7 +95,7 @@ RUN ./configure LDFLAGS=-L`ls -d /opt/db*`/lib/ CPPFLAGS=-I`ls -d /opt/db*`/incl
     --with-gui=no \
     --with-utils \
     --with-libs \
-    --with-sqlite=yes \
+    --with-sqlite \
     --with-daemon
 RUN make -j$(nproc)
 RUN make install
@@ -127,6 +127,7 @@ RUN apk --no-cache add \
   boost-thread \
   sqlite-dev \
   libevent \
+  sqlite-dev \
   libzmq \
   socat \
   sudo \
