@@ -127,9 +127,12 @@ RUN apk --no-cache add \
   boost-thread \
   sqlite-dev \
   libevent \
+  shadow \
+  sqlite \
   sqlite-dev \
   libzmq \
   socat \
+  su-exec \
   sudo \
   tini
 
