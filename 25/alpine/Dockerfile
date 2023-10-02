@@ -85,11 +85,20 @@ RUN    wget https://bitcoincore.org/bin/bitcoin-core-${BITCOIN_VERSION}/SHA256SU
               --disable-tests \
               --disable-bench \
               --disable-ccache \
-              --with-gui=no \
+              --disable-fuzz \
+              --disable-fuzz-binary \
+              --enable-zmq \
+              --enable-wallet \
+              --without-gui \
+              --without-libs \
+              --without-qtdbus \
+              --with-berkdb \
+              --with-boost-process \
+              --with-daemon \
+              --with-external-signer \
               --with-utils \
               --with-libs \
               --with-sqlite \
-              --with-daemon \
          && make -j$(nproc) \
          && make install \
          && strip "${BITCOIN_PREFIX}/bin/bitcoin-cli" \
@@ -126,7 +135,6 @@ RUN    addgroup -g ${BITCOIN_GID} -S bitcoin \
          sqlite-dev \
          libevent \
          shadow \
-         sqlite \
          sqlite-dev \
          libzmq \
          socat \
