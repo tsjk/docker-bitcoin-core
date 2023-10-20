@@ -41,7 +41,7 @@ if [ "$1" = "bitcoind" ] || [ "$1" = "bitcoin-cli" ] || [ "$1" = "bitcoin-tx" ];
     # shellcheck disable=SC2046
     [ -z "$I2P_SAM" ]   || { [ -e /tmp/socat-i2p_sam.lock ]    && [ -e /tmp/socat-i2p_sam.pid ]   && kill -0 $(cat /tmp/socat-i2p_sam.pid) > /dev/null 2>&1; }   || {
       rm -f /tmp/socat-i2p_sam.lock /tmp/socat-i2p_sam.pid
-      su -s /bin/sh bitcoin -c "/usr/bin/socat -L /tmp/socat-i2p_sam.lock   TCP4-LISTEN:7675,bind=127.0.0.1,reuseaddr,fork TCP4:$I2P_SAM" &
+      su -s /bin/sh bitcoin -c "/usr/bin/socat -L /tmp/socat-i2p_sam.lock   TCP4-LISTEN:7656,bind=127.0.0.1,reuseaddr,fork TCP4:$I2P_SAM" &
       echo $! > /tmp/socat-i2p_sam.pid; }
     if [ -d "$BITCOIN_DATA/.pre_start.d" ]; then
       for f in "$BITCOIN_DATA/.pre-start.d"/*.sh; do
