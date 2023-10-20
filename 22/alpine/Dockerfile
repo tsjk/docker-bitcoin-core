@@ -137,6 +137,7 @@ ENV PATH=${BITCOIN_PREFIX}/bin:$PATH
 
 ENV TOR_SOCKSD=""
 ENV TOR_CTRLD=""
+ENV I2P_SAM=""
 
 COPY --from=bitcoin-core /opt /opt
 COPY docker-entrypoint.sh /entrypoint.sh
