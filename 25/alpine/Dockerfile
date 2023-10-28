@@ -121,7 +121,6 @@ ENV BITCOIN_DATA="/home/bitcoin/.bitcoin" \
     BITCOIN_PREFIX="/opt/bitcoin-${BITCOIN_VERSION}" \
     BITCOIN_UID=${UID} \
     BITCOIN_GID=${GID} \
-    I2P_SAM="" \
     TOR_SOCKSD="" \
     TOR_CTRLD=""
 

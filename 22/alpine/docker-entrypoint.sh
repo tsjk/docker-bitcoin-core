@@ -38,11 +38,6 @@ if [ "$1" = "bitcoind" ] || [ "$1" = "bitcoin-cli" ] || [ "$1" = "bitcoin-tx" ];
       rm -f /tmp/socat-tor_ctrl.lock /tmp/socat-tor_ctrl.pid
       su -s /bin/sh bitcoin -c "/usr/bin/socat -L /tmp/socat-tor_ctrl.lock  TCP4-LISTEN:9051,bind=127.0.0.1,reuseaddr,fork TCP4:$TOR_CTRLD" &
       echo $! > /tmp/socat-tor_ctrl.pid; }
-    # shellcheck disable=SC2046
-    [ -z "$I2P_SAM" ]   || { [ -e /tmp/socat-i2p_sam.lock ]    && [ -e /tmp/socat-i2p_sam.pid ]   && kill -0 $(cat /tmp/socat-i2p_sam.pid) > /dev/null 2>&1; }   || {
-      rm -f /tmp/socat-i2p_sam.lock /tmp/socat-i2p_sam.pid
-      su -s /bin/sh bitcoin -c "/usr/bin/socat -L /tmp/socat-i2p_sam.lock   TCP4-LISTEN:7656,bind=127.0.0.1,reuseaddr,fork TCP4:$I2P_SAM" &
-      echo $! > /tmp/socat-i2p_sam.pid; }
     if [ -d "$BITCOIN_DATA/.pre_start.d" ]; then
       for f in "$BITCOIN_DATA/.pre-start.d"/*.sh; do
         if [ -s "$f" ] && [ -x "$f" ]; then
@@ -55,8 +50,6 @@ if [ "$1" = "bitcoind" ] || [ "$1" = "bitcoin-cli" ] || [ "$1" = "bitcoin-tx" ];
     echo "$0: launching bitcoind as a background job"; echo
     p="$1"; shift 1; su -s /bin/sh bitcoin -c "$BITCOIN_PREFIX/bin/$p $*" & bitcoind_pid=$!
     wait $bitcoind_pid
-    # shellcheck disable=SC2046
-    [ ! -e /tmp/socat-i2p_sam.pid ]   || ! kill -0 $(cat /tmp/socat-i2p_sam.pid) > /dev/null 2>&1   || kill $(cat /tmp/socat-i2p_sam.pid)
     # shellcheck disable=SC2046
     [ ! -e /tmp/socat-tor_ctrl.pid ]  || ! kill -0 $(cat /tmp/socat-tor_ctrl.pid) > /dev/null 2>&1  || kill $(cat /tmp/socat-tor_ctrl.pid)
     # shellcheck disable=SC2046
