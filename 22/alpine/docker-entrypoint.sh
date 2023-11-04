@@ -33,6 +33,7 @@ if [ "$1" = "bitcoind" ] || [ "$1" = "bitcoin-cli" ] || [ "$1" = "bitcoin-tx" ];
       rm -f /tmp/socat-tor_socks.lock /tmp/socat-tor_socks.pid
       su -s /bin/sh bitcoin -c "/usr/bin/socat -L /tmp/socat-tor_socks.lock TCP4-LISTEN:9050,bind=127.0.0.1,reuseaddr,fork TCP4:$TOR_SOCKSD" &
       echo $! > /tmp/socat-tor_socks.pid; }
+    # N.B.: To use this, one needs to forward the onion port on the Tor control host to the container. It may be easier to use a service defintion instead.
     # shellcheck disable=SC2046
     [ -z "$TOR_CTRLD" ] || { [ -e /tmp/socat-tor_ctrl.lock ]   && [ -e /tmp/socat-tor_ctrl.pid ]  && kill -0 $(cat /tmp/socat-tor_ctrl.pid) > /dev/null 2>&1; }  || {
       rm -f /tmp/socat-tor_ctrl.lock /tmp/socat-tor_ctrl.pid
