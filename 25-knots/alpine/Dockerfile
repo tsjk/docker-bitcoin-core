@@ -1,5 +1,5 @@
 # Build stage for BerkeleyDB
-FROM --platform=${TARGETPLATFORM:-${BUILDPLATFORM}} alpine as berkeleydb
+FROM --platform=${TARGETPLATFORM:-${BUILDPLATFORM}} alpine:3.20 as berkeleydb
 
 ARG TARGETPLATFORM
 
@@ -24,7 +24,7 @@ RUN     wget "https://download.oracle.com/berkeley-db/${BERKELEYDB_VERSION}.tar.
          && rm -rf "${BERKELEYDB_PREFIX}/docs" )
 
 # Build stage for Bitcoin Core
-FROM --platform=${TARGETPLATFORM:-${BUILDPLATFORM}} alpine as bitcoin-knots
+FROM --platform=${TARGETPLATFORM:-${BUILDPLATFORM}} alpine:3.20 as bitcoin-knots
 
 COPY --from=berkeleydb /opt /opt
 
@@ -98,7 +98,7 @@ RUN    gpg --verify SHA256SUMS.asc SHA256SUMS && rm -rf /root/.gnupg \
          && strip "${BITCOIN_PREFIX}/lib/libbitcoinconsensus.so.0.0.0" )
 
 # Build stage for compiled artifacts
-FROM --platform=${TARGETPLATFORM:-${BUILDPLATFORM}} alpine
+FROM --platform=${TARGETPLATFORM:-${BUILDPLATFORM}} alpine:3.20
 
 LABEL maintainer.0="João Fonseca (@joaopaulofonseca)" \
       maintainer.1="Pedro Branco (@pedrobranco)" \
