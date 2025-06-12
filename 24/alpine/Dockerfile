@@ -1,5 +1,5 @@
 # Build stage for BerkeleyDB
-FROM alpine as berkeleydb
+FROM alpine:3.20 as berkeleydb
 
 ARG TARGETPLATFORM
 
@@ -25,7 +25,7 @@ RUN make install
 RUN rm -rf ${BERKELEYDB_PREFIX}/docs
 
 # Build stage for Bitcoin Core
-FROM alpine as bitcoin-core
+FROM alpine:3.20 as bitcoin-core
 
 COPY --from=berkeleydb /opt /opt
 
