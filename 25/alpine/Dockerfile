@@ -1,5 +1,5 @@
 # Build stage for BerkeleyDB
-FROM --platform=${TARGETPLATFORM:-${BUILDPLATFORM}} alpine as berkeleydb
+FROM --platform=${TARGETPLATFORM:-${BUILDPLATFORM}} alpine:3.20 as berkeleydb
 
 ARG TARGETPLATFORM
 
@@ -24,7 +24,7 @@ RUN     wget "https://download.oracle.com/berkeley-db/${BERKELEYDB_VERSION}.tar.
          && rm -rf "${BERKELEYDB_PREFIX}/docs" )
 
 # Build stage for Bitcoin Core
-FROM --platform=${TARGETPLATFORM:-${BUILDPLATFORM}} alpine as bitcoin-core
+FROM --platform=${TARGETPLATFORM:-${BUILDPLATFORM}} alpine:3.20 as bitcoin-core
 
 COPY --from=berkeleydb /opt /opt
 
@@ -45,17 +45,12 @@ RUN    sed -i 's/http\:\/\/dl-cdn.alpinelinux.org/https\:\/\/alpine.global.ssl.f
          zeromq-dev
 RUN set -ex \
   && for key in \
-       0AD83877C1F0CD1EE9BD660AD7CC770B81FD22A8 \
        152812300785C96444D3334D17565732E08E5E41 \
-       590B7292695AFFA5B672CBB2E13FC145CD3F4304 \
-       616516B8EB6ED02882FC4A7A8ADCB558C4F33D65 \
-       670BC460DC8BF5EEF1C3BC74B14CC9F833238F85 \
+       637DB1E23370F84AFF88CCE03152347D07DA627C \
        6A8F9C266528E25AEB1D7731C2371D91CB716EA7 \
-       9DEAE0DC7063249FB05474681E4AED62986CD25D \
-       C388F6961FB972A95678E327F62711DBDCA8AE56 \
        CFB16E21C950F67FA95E558F2EEB9F5CC09526C1 \
+       D1DBF2C4B96F2DEBF4C16654410108112E7EA81F \
        F19F5FF2B0589EC341220045BA03F4DBE0C63FB4 \
-       F2CFC4ABD0B99D837EEBB7D09B79B45691DB4173 \
        F4FC70F07310028424EFC20A8E4256593F177720 \
   ; do \
     gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$key" || \
@@ -66,7 +61,7 @@ RUN set -ex \
     gpg --batch --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys "$key" ; \
   done
 
-ENV BITCOIN_VERSION=25.1
+ENV BITCOIN_VERSION=25.2
 ENV BITCOIN_PREFIX=/opt/bitcoin-${BITCOIN_VERSION}
 
 RUN    wget https://bitcoincore.org/bin/bitcoin-core-${BITCOIN_VERSION}/SHA256SUMS \
@@ -116,7 +111,7 @@ LABEL maintainer.0="João Fonseca (@joaopaulofonseca)" \
 ARG UID=1001 \
     GID=1001
 
-ENV BITCOIN_VERSION=25.1
+ENV BITCOIN_VERSION=25.2
 ENV BITCOIN_DATA="/home/bitcoin/.bitcoin" \
     BITCOIN_PREFIX="/opt/bitcoin-${BITCOIN_VERSION}" \
     BITCOIN_UID=${UID} \
