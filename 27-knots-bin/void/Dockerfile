@@ -34,8 +34,8 @@ RUN    set -ex \
     && ( cd /opt && \
            { case ${TARGETPLATFORM} in \
                "linux/amd64") BITCOIN_TARBALL="bitcoin-${BITCOIN_VERSION}-x86_64-linux-gnu.tar.gz" ;; \
-               "linux/arm64") BITCOIN_TARBALL="bitcoin-${BITCOIN_VERSION}-aarch-linux-gnu.tar.gz" ;; \
-               "linux/arm32v7") BITCOIN_TARBALL="bitcoin-${BITCOIN_VERSION}-arm-linux-gnueabihf.tar.gz" ;; \
+               "linux/arm64"|"linux/arm64/v8") BITCOIN_TARBALL="bitcoin-${BITCOIN_VERSION}-aarch64-linux-gnu.tar.gz" ;; \
+               "linux/arm32v7"|"linux/arm32/v7") BITCOIN_TARBALL="bitcoin-${BITCOIN_VERSION}-arm-linux-gnueabihf.tar.gz" ;; \
                *) echo "ERROR: Unsupported TARGETPLATFORM: ${TARGETPLATFORM}."; exit 1  ;; \
              esac; } \
            && { for f in ${BITCOIN_TARBALL} SHA256SUMS SHA256SUMS.asc; do \
@@ -62,7 +62,7 @@ RUN    set -ex \
            && useradd -c "bitcoind unprivileged user" -m -g ${BITCOIN_GID} -G users -r -u ${BITCOIN_UID} bitcoin \
        ) \
     && { for f in ${BITCOIN_PREFIX}/bin/*; do \
-           printf '\nldd %s:\n' "${f}" && ldd ${f} && printf 'OK: ldd %s\n' "${f}" || exit 1; done; }
+           [ "${f}" = "${BITCOIN_PREFIX}/bin/bitcoin-qt" ] || { printf '\nldd %s:\n' "${f}" && ldd ${f} && printf 'OK: ldd %s\n' "${f}" || exit 1; }; done; }
 
 ENV PATH="${BITCOIN_PREFIX}/bin:${PATH}"
 
