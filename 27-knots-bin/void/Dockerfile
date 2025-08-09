@@ -49,7 +49,7 @@ RUN    set -ex \
                 libboost_filesystem \
                 libboost_system \
                 libboost_thread \
-                libevent \
+                libevent-devel \
                 shadow \
                 socat \
                 sqlite-devel \
