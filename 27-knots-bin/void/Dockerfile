@@ -45,22 +45,22 @@ RUN    set -ex \
            && tar -xzf ${BITCOIN_TARBALL} \
            && [ -d "${BITCOIN_PREFIX}/bin" ] \
            && rm SHA256SUMS.asc SHA256SUMS ${BITCOIN_TARBALL} \
-           && xbps-install -y \
-                libboost_filesystem \
-                libboost_system \
-                libboost_thread \
-                libevent-devel \
-                shadow \
-                socat \
-                sqlite-devel \
-                su-exec \
-                sudo \
-                tini \
-                util-linux \
-                zeromq-devel \
-           && groupadd -g ${BITCOIN_GID} -r bitcoin \
-           && useradd -c "bitcoind unprivileged user" -m -g ${BITCOIN_GID} -G users -r -u ${BITCOIN_UID} bitcoin \
        ) \
+    && xbps-install -y \
+         libboost_filesystem \
+         libboost_system \
+         libboost_thread \
+         libevent-devel \
+         shadow \
+         socat \
+         sqlite-devel \
+         su-exec \
+         sudo \
+         tini \
+         util-linux \
+         zeromq-devel \
+    && groupadd -g ${BITCOIN_GID} -r bitcoin \
+    && useradd -c "bitcoind unprivileged user" -m -g ${BITCOIN_GID} -G users -r -u ${BITCOIN_UID} bitcoin \
     && { for f in ${BITCOIN_PREFIX}/bin/*; do \
            [ "${f}" = "${BITCOIN_PREFIX}/bin/bitcoin-qt" ] || { printf '\nldd %s:\n' "${f}" && ldd ${f} && printf 'OK: ldd %s\n' "${f}" || exit 1; }; done; }
 
