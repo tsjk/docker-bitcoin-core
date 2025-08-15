@@ -2,26 +2,38 @@
 set -e
 
 if [ -n "${UID+x}" ] && [ "${UID}" != "0" ]; then
-  usermod -u "$UID" bitcoin
+  U='bitcoin'; usermod -o -u "$UID" $U
+  echo "$0: uid for user bitcoin is $(id -u bitcoin)"
+else
+  U='root'
 fi
 
 if [ -n "${GID+x}" ] && [ "${GID}" != "0" ]; then
-  groupmod -g "$GID" bitcoin
+  G='bitcoin'
+  groupmod -o -g "$GID" $G
+  echo "$0: gid for group bitcoin is $(id -g bitcoin)"
+else
+  G='root'
 fi
 
-echo "$0: assuming uid:gid for bitcoin:bitcoin of $(id -u bitcoin):$(id -g bitcoin)"
+find "/home/bitcoin" -xdev -not -user $U -exec chown -h "$U" {} \;
+find "/home/bitcoin" -xdev -not -group $G -exec chgrp -h "$G" {} \;
 
 # shellcheck disable=SC2046
 if [ $(echo "$1" | cut -c1) = "-" ]; then
-  echo "$0: assuming arguments for bitcoind"
+  echo "$0: assuming supplied arguments are for bitcoind"
   set -- bitcoind "$@"
 fi
 
-if [ "$1" = "bitcoind" ]; then
-  mkdir -p "$BITCOIN_DATA" && { \
+mkdir -p "$BITCOIN_DATA" && { \
+  if [ "$NO_PERMISSIONS_CHANGES" != "1" ]; then
     chmod 700 "$BITCOIN_DATA"; \
-    chown -R bitcoin "$BITCOIN_DATA"; }
+    find "$BITCOIN_DATA"/ -xdev -not -user $U -exec chown -h "$U" {} \;; \
+    find "$BITCOIN_DATA"/ -xdev -not -group $G -exec chgrp -h "$G" {} \;; \
+  fi
+}
 
+if [ "$1" = "bitcoind" ]; then
   echo "$0: setting data directory to $BITCOIN_DATA"
   set -- "$@" -datadir="$BITCOIN_DATA"
 fi
@@ -31,13 +43,23 @@ if [ "$1" = "bitcoind" ] || [ "$1" = "bitcoin-cli" ] || [ "$1" = "bitcoin-tx" ];
     # shellcheck disable=SC2046
     [ -z "$TOR_SOCKSD" ] || { [ -e /tmp/socat-tor_socks.lock ] && [ -e /tmp/socat-tor_socks.pid ] && kill -0 $(cat /tmp/socat-tor_socks.pid) > /dev/null 2>&1; } || {
       rm -f /tmp/socat-tor_socks.lock /tmp/socat-tor_socks.pid
-      su -s /bin/sh bitcoin -c "/usr/bin/socat -L /tmp/socat-tor_socks.lock TCP4-LISTEN:9050,bind=127.0.0.1,reuseaddr,fork TCP4:$TOR_SOCKSD" &
+      TOR_SOCKSD_CMD="/usr/bin/socat -L /tmp/socat-tor_socks.lock TCP4-LISTEN:9050,bind=127.0.0.1,reuseaddr,fork TCP4:$TOR_SOCKSD"
+      if [ "$U" = "bitcoin" ]; then
+        su -s /bin/sh bitcoin -c "$TOR_SOCKSD_CMD" &
+      else
+        $TOR_SOCKSD_CMD &
+      fi
       echo $! > /tmp/socat-tor_socks.pid; }
     # N.B.: To use this, one needs to forward the onion port on the Tor control host to the container. It may be easier to use a service defintion instead.
     # shellcheck disable=SC2046
     [ -z "$TOR_CTRLD" ] || { [ -e /tmp/socat-tor_ctrl.lock ]   && [ -e /tmp/socat-tor_ctrl.pid ]  && kill -0 $(cat /tmp/socat-tor_ctrl.pid) > /dev/null 2>&1; }  || {
       rm -f /tmp/socat-tor_ctrl.lock /tmp/socat-tor_ctrl.pid
-      su -s /bin/sh bitcoin -c "/usr/bin/socat -L /tmp/socat-tor_ctrl.lock  TCP4-LISTEN:9051,bind=127.0.0.1,reuseaddr,fork TCP4:$TOR_CTRLD" &
+      TOR_CTRLD_CMD="/usr/bin/socat -L /tmp/socat-tor_ctrl.lock  TCP4-LISTEN:9051,bind=127.0.0.1,reuseaddr,fork TCP4:$TOR_CTRLD"
+      if [ "$U" = "bitcoin" ]; then
+        su -s /bin/sh $U -c "$TOR_CTRLD_CMD" &
+      else
+        $TOR_CTRLD_CMD &
+      fi
       echo $! > /tmp/socat-tor_ctrl.pid; }
     if [ -d "$BITCOIN_DATA/.pre_start.d" ]; then
       for f in "$BITCOIN_DATA/.pre-start.d"/*.sh; do
@@ -49,15 +71,20 @@ if [ "$1" = "bitcoind" ] || [ "$1" = "bitcoin-cli" ] || [ "$1" = "bitcoin-tx" ];
       done
     fi
     echo "$0: launching bitcoind as a background job"; echo
-    p="$1"; shift 1; su -s /bin/sh bitcoin -c "$BITCOIN_PREFIX/bin/$p $*" & bitcoind_pid=$!
-    wait $bitcoind_pid
+    p="$1"; shift 1
+    if [ "$U" = "bitcoin" ]; then
+      su -s /bin/sh $U -c "$BITCOIN_PREFIX/bin/$p $*" &
+    else
+      "$BITCOIN_PREFIX/bin/$p" "$@" &
+    fi
+    bitcoind_pid=$!; wait $bitcoind_pid
     # shellcheck disable=SC2046
     [ ! -e /tmp/socat-tor_ctrl.pid ]  || ! kill -0 $(cat /tmp/socat-tor_ctrl.pid) > /dev/null 2>&1  || kill $(cat /tmp/socat-tor_ctrl.pid)
     # shellcheck disable=SC2046
     [ ! -e /tmp/socat-tor_socks.pid ] || ! kill -0 $(cat /tmp/socat-tor_socks.pid) > /dev/null 2>&1 || kill $(cat /tmp/socat-tor_socks.pid)
   else
-    echo; sudo -u bitcoin -- "$@"
+    echo; if [ "$U" = "bitcoin" ]; then sudo -u $U -- "$@"; else "$@"; fi
   fi
 else
-  echo; exec "$@"
+  echo; if [ "$U" = "bitcoin" ]; then su-exec $U "$@"; else exec "$@"; fi
 fi
