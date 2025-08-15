@@ -1,6 +1,8 @@
 #!/bin/sh
 
-cli() { timeout -k 60s 50s bitcoin-cli -datadir='/home/bitcoin/.bitcoin' "$@"; }
+[ -n "$BITCOIN_CHAIN" ] || BITCOIN_CHAIN="main"
+
+cli() { timeout 60 bitcoin-cli -chain="$BITCOIN_CHAIN" -datadir='/home/bitcoin/.bitcoin' "$@"; }
 
 get_getblockchaininfo_value_for_key() {
   [ -n "$1" ] && \
@@ -24,6 +26,6 @@ latest_block_time_stamp=$(cli getblock $latest_block_hash  2> /dev/null | awk -F
 [ -n "$latest_block_time_stamp" ] || exit 1
 
 latest_block_age=$(( $(date '+%s') - $latest_block_time_stamp ))
-[ $latest_block_age -lt 1200 ] || exit 1
+[ $latest_block_age -lt 2700 ] || exit 1
 
 exit 0
