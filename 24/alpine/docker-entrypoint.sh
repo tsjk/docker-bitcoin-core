@@ -1,16 +1,16 @@
 #!/bin/sh
 set -e
 
-if [ -n "${UID+x}" ] && [ "${UID}" != "0" ]; then
-  U='bitcoin'; usermod -o -u "$UID" $U
+if [ -n "${BITCOIN_UID+x}" ] && [ "${BITCOIN_UID}" != "0" ]; then
+  U='bitcoin'; usermod -o -u "$BITCOIN_UID" $U
   echo "$0: uid for user bitcoin is $(id -u bitcoin)"
 else
   U='root'
 fi
 
-if [ -n "${GID+x}" ] && [ "${GID}" != "0" ]; then
+if [ -n "${BITCOIN_GID+x}" ] && [ "${BITCOIN_GID}" != "0" ]; then
   G='bitcoin'
-  groupmod -o -g "$GID" $G
+  groupmod -o -g "$BITCOIN_GID" $G
   echo "$0: gid for group bitcoin is $(id -g bitcoin)"
 else
   G='root'
