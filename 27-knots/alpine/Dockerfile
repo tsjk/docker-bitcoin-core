@@ -26,8 +26,12 @@ RUN     wget "https://download.oracle.com/berkeley-db/${BERKELEYDB_VERSION}.tar.
 # Build stage for Bitcoin Core
 FROM --platform=${TARGETPLATFORM:-${BUILDPLATFORM}} alpine:3.22 as bitcoin-knots
 
+ARG TARGETPLATFORM
 ARG GET_FROM_GITHUB
+ARG REMOVEBRANDING
+
 COPY --from=berkeleydb /opt /opt
+COPY ./0000-remove_branding.patch /tmp/0000-remove_branding.patch
 
 RUN    sed -i 's/http\:\/\/dl-cdn.alpinelinux.org/https\:\/\/alpine.global.ssl.fastly.net/g' /etc/apk/repositories \
     && apk --no-cache add \
@@ -42,6 +46,7 @@ RUN    sed -i 's/http\:\/\/dl-cdn.alpinelinux.org/https\:\/\/alpine.global.ssl.f
          libressl \
          libtool \
          linux-headers \
+         patch \
          sqlite-dev \
          zeromq-dev
 
@@ -75,10 +80,15 @@ RUN    { if [ -n "${GET_FROM_GITHUB}" ]; then \
            && wget https://bitcoinknots.org/files/${BITCOIN_VERSION%%.*}.x/${BITCOIN_VERSION}/bitcoin-${BITCOIN_VERSION}.tar.gz; \
          fi; \
        } \
+    && gpg --verify SHA256SUMS.asc SHA256SUMS && rm -rf /root/.gnupg \
     && grep " bitcoin-${BITCOIN_VERSION}.tar.gz\$" SHA256SUMS | sha256sum -c - \
-    && tar -xzf *.tar.gz \
-    && (    cd "/bitcoin-${BITCOIN_VERSION}" \
+    && tar -xzf *.tar.gz
+RUN    (    cd "/bitcoin-${BITCOIN_VERSION}" \
          && sed -i 's:sys/fcntl.h:fcntl.h:' src/compat/compat.h \
+         && { [ -z "${REMOVEBRANDING}" ] || { \
+                patch -p1 < /tmp/0000-remove_branding.patch && \
+                  sed -i 's/\.knots20240801/\.0/' ./share/genbuild.sh; \
+            }; } \
          && ./autogen.sh \
          && ./configure LDFLAGS=-L`ls -d /opt/db*`/lib/ CPPFLAGS=-I`ls -d /opt/db*`/include/ \
               --prefix="${BITCOIN_PREFIX}" \
@@ -91,15 +101,14 @@ RUN    { if [ -n "${GET_FROM_GITHUB}" ]; then \
               --enable-zmq \
               --enable-wallet \
               --without-gui \
-              --without-libs \
               --without-qtdbus \
               --with-berkdb \
               --with-boost-process \
               --with-daemon \
               --with-external-signer \
-              --with-utils \
               --with-libs \
               --with-sqlite \
+              --with-utils \
          && make -j$(nproc) \
          && make install \
          && strip "${BITCOIN_PREFIX}/bin/bitcoin-cli" \
@@ -110,6 +119,9 @@ RUN    { if [ -n "${GET_FROM_GITHUB}" ]; then \
 
 # Build stage for compiled artifacts
 FROM --platform=${TARGETPLATFORM:-${BUILDPLATFORM}} alpine:3.22
+
+ARG TARGETPLATFORM
+ARG REMOVEBRANDING
 
 LABEL maintainer.0="João Fonseca (@joaopaulofonseca)" \
       maintainer.1="Pedro Branco (@pedrobranco)" \
@@ -156,4 +168,8 @@ ENTRYPOINT ["/sbin/tini", "--", "/entrypoint.sh"]
 
 CMD ["bitcoind"]
 
-RUN bitcoind -version | grep "Bitcoin Knots version v${BITCOIN_VERSION}"
+RUN if [ -z "${REMOVEBRANDING}" ]; then \
+      bitcoind -version | grep -Fx "Bitcoin Knots version v${BITCOIN_VERSION}"; \
+    else \
+      bitcoind -version | grep -Fx "Bitcoin Core version v${BITCOIN_VERSION%.knots20240801}.0"; \
+    fi

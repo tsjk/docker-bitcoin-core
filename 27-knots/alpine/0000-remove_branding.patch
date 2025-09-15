@@ -1,0 +1,33 @@
+diff '--color=auto' -bur bitcoin-27.1.knots20240801_orig/configure.ac bitcoin-27.1.knots20240801/configure.ac
+--- bitcoin-27.1.knots20240801_orig/configure.ac	2024-08-01 02:06:00.000000000 +0200
++++ bitcoin-27.1.knots20240801/configure.ac	2025-09-15 13:12:03.218544372 +0200
+@@ -7,7 +7,7 @@
+ define(_COPYRIGHT_YEAR, 2024)
+ define(_COPYRIGHT_HOLDERS,[The %s developers])
+ define(_COPYRIGHT_HOLDERS_SUBSTITUTION,[[Bitcoin Core]])
+-AC_INIT([Bitcoin Knots],m4_join([.], _CLIENT_VERSION_MAJOR, _CLIENT_VERSION_MINOR, _CLIENT_VERSION_BUILD)m4_if(_CLIENT_VERSION_RC, [0], [], [rc]_CLIENT_VERSION_RC),[https://github.com/bitcoinknots/bitcoin/issues],[bitcoin],[https://bitcoinknots.org/])
++AC_INIT([Bitcoin Core],m4_join([.], _CLIENT_VERSION_MAJOR, _CLIENT_VERSION_MINOR, _CLIENT_VERSION_BUILD)m4_if(_CLIENT_VERSION_RC, [0], [], [rc]_CLIENT_VERSION_RC),[https://github.com/bitcoin/bitcoin/issues],[bitcoin],[https://bitcoincore.org/])
+ AC_CONFIG_SRCDIR([src/validation.cpp])
+ AC_CONFIG_HEADERS([src/config/bitcoin-config.h])
+ AC_CONFIG_AUX_DIR([build-aux])
+diff '--color=auto' -bur bitcoin-27.1.knots20240801_orig/src/clientversion.cpp bitcoin-27.1.knots20240801/src/clientversion.cpp
+--- bitcoin-27.1.knots20240801_orig/src/clientversion.cpp	2024-08-01 02:06:00.000000000 +0200
++++ bitcoin-27.1.knots20240801/src/clientversion.cpp	2025-09-15 13:14:12.913557914 +0200
+@@ -79,8 +79,6 @@
+         ss << ")";
+     }
+     ss << "/";
+-    if (!fBaseNameOnly)
+-        ss << "Knots:20240801/";
+     return ss.str();
+ }
+ 
+@@ -98,7 +96,7 @@
+ 
+ std::string LicenseInfo()
+ {
+-    const std::string URL_SOURCE_CODE = "<https://github.com/bitcoinknots/bitcoin>";
++    const std::string URL_SOURCE_CODE = "<https://github.com/bitcoin/bitcoin>";
+ 
+     return CopyrightHolders(strprintf(_("Copyright (C) %i-%i").translated, 2009, COPYRIGHT_YEAR) + " ") + "\n" +
+            "\n" +
