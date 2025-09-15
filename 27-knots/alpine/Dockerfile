@@ -26,6 +26,7 @@ RUN     wget "https://download.oracle.com/berkeley-db/${BERKELEYDB_VERSION}.tar.
 # Build stage for Bitcoin Core
 FROM --platform=${TARGETPLATFORM:-${BUILDPLATFORM}} alpine:3.22 as bitcoin-knots
 
+ARG GET_FROM_GITHUB
 COPY --from=berkeleydb /opt /opt
 
 RUN    sed -i 's/http\:\/\/dl-cdn.alpinelinux.org/https\:\/\/alpine.global.ssl.fastly.net/g' /etc/apk/repositories \
@@ -64,10 +65,16 @@ RUN set -ex \
 ENV BITCOIN_VERSION=27.1.knots20240801
 ENV BITCOIN_PREFIX=/opt/bitcoin-${BITCOIN_VERSION}
 
-RUN    wget https://bitcoinknots.org/files/${BITCOIN_VERSION%%.*}.x/${BITCOIN_VERSION}/SHA256SUMS \
-    && wget https://bitcoinknots.org/files/${BITCOIN_VERSION%%.*}.x/${BITCOIN_VERSION}/SHA256SUMS.asc \
-    && wget https://bitcoinknots.org/files/${BITCOIN_VERSION%%.*}.x/${BITCOIN_VERSION}/bitcoin-${BITCOIN_VERSION}.tar.gz
-RUN    gpg --verify SHA256SUMS.asc SHA256SUMS && rm -rf /root/.gnupg \
+RUN    { if [ -n "${GET_FROM_GITHUB}" ]; then \
+              wget https://github.com/bitcoinknots/bitcoin/releases/download/v${BITCOIN_VERSION}/SHA256SUMS \
+           && wget https://github.com/bitcoinknots/bitcoin/releases/download/v${BITCOIN_VERSION}/SHA256SUMS.asc \
+           && wget https://github.com/bitcoinknots/bitcoin/releases/download/v${BITCOIN_VERSION}/bitcoin-${BITCOIN_VERSION}.tar.gz; \
+         else \
+              wget https://bitcoinknots.org/files/${BITCOIN_VERSION%%.*}.x/${BITCOIN_VERSION}/SHA256SUMS \
+           && wget https://bitcoinknots.org/files/${BITCOIN_VERSION%%.*}.x/${BITCOIN_VERSION}/SHA256SUMS.asc \
+           && wget https://bitcoinknots.org/files/${BITCOIN_VERSION%%.*}.x/${BITCOIN_VERSION}/bitcoin-${BITCOIN_VERSION}.tar.gz; \
+         fi; \
+       } \
     && grep " bitcoin-${BITCOIN_VERSION}.tar.gz\$" SHA256SUMS | sha256sum -c - \
     && tar -xzf *.tar.gz \
     && (    cd "/bitcoin-${BITCOIN_VERSION}" \
