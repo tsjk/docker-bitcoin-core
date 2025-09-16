@@ -3,25 +3,28 @@ FROM --platform=${TARGETPLATFORM:-${BUILDPLATFORM}} alpine:3.22 as berkeleydb
 
 ARG TARGETPLATFORM
 
-RUN sed -i 's/http\:\/\/dl-cdn.alpinelinux.org/https\:\/\/alpine.global.ssl.fastly.net/g' /etc/apk/repositories \
-    && apk --no-cache add \
-         autoconf \
-         automake \
-         build-base \
-         libressl
-
 ENV BERKELEYDB_VERSION=db-4.8.30.NC
 ENV BERKELEYDB_PREFIX=/opt/${BERKELEYDB_VERSION}
 
-RUN     wget "https://download.oracle.com/berkeley-db/${BERKELEYDB_VERSION}.tar.gz" \
-    && tar -xzf *.tar.gz \
-    && sed 's/__atomic_compare_exchange/__atomic_compare_exchange_db/g' -i "${BERKELEYDB_VERSION}/dbinc/atomic.h" \
-    && mkdir -p "${BERKELEYDB_PREFIX}" \
-    && (    cd "/${BERKELEYDB_VERSION}/build_unix" \
-         && ../dist/configure --enable-cxx --disable-shared --with-pic --prefix="${BERKELEYDB_PREFIX}" CFLAGS="-Wno-error=implicit-function-declaration" \
-         && make -j$(nproc) \
-         && make install \
-         && rm -rf "${BERKELEYDB_PREFIX}/docs" )
+RUN [ "${TARGETPLATFORM#*/}" != "amd64" ] && \
+      printf "Skipping build of berkely-db as target architecture (%s) is not amd64. Only SQLite wallets will be supported.\n" "${TARGETPLATFORM#*/}" \
+    || { \
+         sed -i 's/http\:\/\/dl-cdn.alpinelinux.org/https\:\/\/alpine.global.ssl.fastly.net/g' /etc/apk/repositories \
+      && apk --no-cache add \
+           autoconf \
+           automake \
+           build-base \
+           libressl \
+      && wget "https://download.oracle.com/berkeley-db/${BERKELEYDB_VERSION}.tar.gz" \
+      && tar -xzf *.tar.gz \
+      && sed 's/__atomic_compare_exchange/__atomic_compare_exchange_db/g' -i "${BERKELEYDB_VERSION}/dbinc/atomic.h" \
+      && mkdir -p "${BERKELEYDB_PREFIX}" \
+      && (    cd "/${BERKELEYDB_VERSION}/build_unix" \
+           && ../dist/configure --enable-cxx --disable-shared --with-pic --prefix="${BERKELEYDB_PREFIX}" CFLAGS="-Wno-error=implicit-function-declaration" \
+           && make -j$(nproc) \
+           && make install \
+           && rm -rf "${BERKELEYDB_PREFIX}/docs" ); \
+    }
 
 # Build stage for Bitcoin Core
 FROM --platform=${TARGETPLATFORM:-${BUILDPLATFORM}} alpine:3.22 as bitcoin-knots
@@ -106,7 +109,7 @@ RUN    (    cd "/bitcoin-${BITCOIN_VERSION}" \
               --enable-zmq \
               --without-gui \
               --without-qtdbus \
-              --with-berkdb \
+              $([ "${TARGETPLATFORM#*/}" != "amd64" ] || printf '--with-berkdb') \
               --with-boost-process \
               --with-daemon \
               --with-libs \
