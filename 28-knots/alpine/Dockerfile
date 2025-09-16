@@ -93,7 +93,8 @@ RUN    (    cd "/bitcoin-${BITCOIN_VERSION}" \
                   sed -i "s/\.${BITCOIN_VERSION##*.}/\.0/" ./share/genbuild.sh; \
             }; } \
          && ./autogen.sh \
-         && ./configure LDFLAGS=-L`ls -d /opt/db*`/lib/ CPPFLAGS=-I`ls -d /opt/db*`/include/ \
+         && { [ "${TARGETPLATFORM#*/}" != "amd64" ] || BERKELEYDB_PREFIX=$(ls -d /opt/db*); } \
+         && ./configure $([ "${TARGETPLATFORM#*/}" != "amd64" ] || printf 'LDFLAGS=-L%s/lib/ CPPFLAGS=-I%s/include/' "${BERKELEYDB_PREFIX}" "${BERKELEYDB_PREFIX}") \
               --prefix="${BITCOIN_PREFIX}" \
               --disable-tests \
               --disable-bench \
