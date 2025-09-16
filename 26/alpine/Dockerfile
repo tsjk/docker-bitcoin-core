@@ -78,7 +78,6 @@ RUN    wget https://bitcoincore.org/bin/bitcoin-core-${BITCOIN_VERSION}/SHA256SU
          && ./autogen.sh \
          && ./configure LDFLAGS=-L`ls -d /opt/db*`/lib/ CPPFLAGS=-I`ls -d /opt/db*`/include/ \
               --prefix="${BITCOIN_PREFIX}" \
-              --mandir=/usr/share/man \
               --disable-tests \
               --disable-bench \
               --disable-ccache \
@@ -87,15 +86,14 @@ RUN    wget https://bitcoincore.org/bin/bitcoin-core-${BITCOIN_VERSION}/SHA256SU
               --enable-zmq \
               --enable-wallet \
               --without-gui \
-              --without-libs \
               --without-qtdbus \
               --with-berkdb \
               --with-boost-process \
               --with-daemon \
               --with-external-signer \
-              --with-utils \
               --with-libs \
               --with-sqlite \
+              --with-utils \
          && make -j$(nproc) \
          && make install \
          && strip "${BITCOIN_PREFIX}/bin/bitcoin-cli" \

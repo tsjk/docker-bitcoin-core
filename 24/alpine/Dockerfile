@@ -82,7 +82,6 @@ RUN sed -i s:sys/fcntl.h:fcntl.h: src/compat/compat.h
 RUN ./autogen.sh
 RUN ./configure LDFLAGS=-L`ls -d /opt/db*`/lib/ CPPFLAGS=-I`ls -d /opt/db*`/include/ \
     --prefix=${BITCOIN_PREFIX} \
-    --mandir=/usr/share/man \
     --disable-tests \
     --disable-bench \
     --disable-ccache \
