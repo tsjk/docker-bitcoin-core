@@ -15,7 +15,7 @@ ENV BITCOIN_DATA="/home/bitcoin/.bitcoin" \
 
 RUN    set -ex \
     && xbps-install -S && xbps-install -uy xbps && xbps-install -uy \
-    && xbps-install -Ay bash gnupg wget \
+    && xbps-install -y bash && xbps-install -Ay gnupg wget \
     && { for key in \
            1A3E761F19D2CC7785C5502EA291A2C45D0C504A \
            CACC7CBB26B3D2EE8FC2F2BC0E37EBAB8574F005 \
@@ -58,12 +58,13 @@ RUN    set -ex \
          zeromq-devel \
     && groupadd -g ${BITCOIN_GID} -r bitcoin \
     && useradd -c "bitcoind unprivileged user" -m -g ${BITCOIN_GID} -G users -r -u ${BITCOIN_UID} bitcoin \
+    && set +x \
     && { for f in ${BITCOIN_PREFIX}/bin/*; do \
            [ "${f}" = "${BITCOIN_PREFIX}/bin/bitcoin-qt" ] || { printf '\nldd %s:\n' "${f}" && ldd ${f} && printf 'OK: ldd %s\n' "${f}" || exit 1; }; done; }
 
 ENV PATH="${BITCOIN_PREFIX}/bin:${PATH}"
 
-RUN bitcoind -version | grep "Bitcoin Knots version v${BITCOIN_VERSION}" \
+RUN    bitcoind -version | grep -Fx "Bitcoin Knots version v${BITCOIN_VERSION}" \
     && xbps-remove -oy \
     && rm -rf /var/cache/xbps
 
