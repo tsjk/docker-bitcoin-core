@@ -106,7 +106,7 @@ RUN    wget https://bitcoincore.org/bin/bitcoin-core-${BITCOIN_VERSION}/SHA256SU
               --with-utils \
          && make -j$(nproc) \
          && make install ) \
-         && ( for f in $(find ${BITCOIN_PREFIX}/bin/ -maxdepth 1 -mindepth 1 -type f -printf '%f\n'); do \
+         && ( for f in $(cd "${BITCOIN_PREFIX}/bin" && find -maxdepth 1 -mindepth 1 -type f); do \
                 strip "${BITCOIN_PREFIX}/bin/${f}" || exit 1; done; )
 
 # Build stage for compiled artifacts
