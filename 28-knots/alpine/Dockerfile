@@ -120,7 +120,7 @@ RUN    (    cd "/bitcoin-${BITCOIN_VERSION}" \
          && make install ) \
          && strip "${BITCOIN_PREFIX}/lib/libbitcoinconsensus.a" \
          && strip "${BITCOIN_PREFIX}/lib/libbitcoinconsensus.so.0.0.0" \
-         && ( for f in bitcoin-cli bitcoin-tx bitcoin-util bitcoin-wallet bitcoind; do \
+         && ( for f in $(find ${BITCOIN_PREFIX}/bin/ -maxdepth 1 -mindepth 1 -type f -printf '%f\n'); do \
                 strip "${BITCOIN_PREFIX}/bin/${f}" || exit 1; done; )
 
 # Build stage for compiled artifacts
