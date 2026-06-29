@@ -43,6 +43,7 @@ RUN --mount=type=cache,target=/var/cache/apk \
          gnupg \
          libevent-dev \
          libressl \
+         libsecp256k1-dev \
          linux-headers \
          python3 \
          sqlite-dev \
@@ -107,6 +108,8 @@ RUN    wget https://bitcoincore.org/bin/bitcoin-core-${BITCOIN_VERSION}/SHA256SU
                             -DWITH_USDT=OFF \
                             -DBUILD_DAEMON=ON \
                             -DWITH_ZMQ=ON \
+                            -DWITH_SYSTEM_LEVELDB=OFF \
+                            -DWITH_SYSTEM_LIBSECP256K1=ON \
                             $([ "${TARGETPLATFORM#*/}" != "amd64" ] || printf '-DAPPEND_CXXFLAGS=-I%s/include/ -DAPPEND_LDFLAGS=-L%s/lib/' "${BERKELEYDB_PREFIX}" "${BERKELEYDB_PREFIX}") \
          && cmake --build build -j$(nproc) \
          && cmake --install build \
@@ -141,6 +144,7 @@ RUN --mount=type=cache,target=/var/cache/apk \
     && sed -i 's/http\:\/\/dl-cdn.alpinelinux.org/https\:\/\/alpine.global.ssl.fastly.net/g' /etc/apk/repositories \
     && apk --no-cache add \
          libevent \
+         libsecp256k1 \
          libzmq \
          shadow \
          socat \
