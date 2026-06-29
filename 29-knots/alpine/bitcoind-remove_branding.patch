@@ -1,0 +1,77 @@
+diff '--color=auto' -rub bitcoin-29.2.knots20251110.orig/CMakeLists.txt bitcoin-29.2.knots20251110/CMakeLists.txt
+--- bitcoin-29.2.knots20251110.orig/CMakeLists.txt	2025-11-10 04:46:34.000000000 +0100
++++ bitcoin-29.2.knots20251110/CMakeLists.txt	2026-05-12 16:29:56.366011408 +0200
+@@ -26,7 +26,7 @@
+ #=============================
+ # Project / Package metadata
+ #=============================
+-set(CLIENT_NAME "Bitcoin Knots")
++set(CLIENT_NAME "Bitcoin Core")
+ set(CLIENT_VERSION_MAJOR 29)
+ set(CLIENT_VERSION_MINOR 2)
+ set(CLIENT_VERSION_BUILD 0)
+@@ -34,7 +34,7 @@
+ set(CLIENT_VERSION_IS_RELEASE "true")
+ set(COPYRIGHT_YEAR "2025")
+ 
+-set(CLIENT_VERSION_SUFFIX ".knots20251110")
++set(CLIENT_VERSION_SUFFIX "")
+ 
+ # During the enabling of the CXX and CXXOBJ languages, we modify
+ # CMake's compiler/linker invocation strings by appending the content
+@@ -55,7 +55,7 @@
+ project(BitcoinCore
+   VERSION ${CLIENT_VERSION_MAJOR}.${CLIENT_VERSION_MINOR}.${CLIENT_VERSION_BUILD}
+   DESCRIPTION "Bitcoin client software"
+-  HOMEPAGE_URL "https://bitcoinknots.org/"
++  HOMEPAGE_URL "https://bitcoincore.org/"
+   LANGUAGES NONE
+ )
+ 
+@@ -66,7 +66,7 @@
+ 
+ set(COPYRIGHT_HOLDERS "The %s developers")
+ set(COPYRIGHT_HOLDERS_FINAL "The ${CLIENT_NAME} developers")
+-set(CLIENT_BUGREPORT "https://github.com/bitcoinknots/bitcoin/issues")
++set(CLIENT_BUGREPORT "https://github.com/bitcoincore/bitcoin/issues")
+ 
+ #=============================
+ # Language setup
+diff '--color=auto' -rub bitcoin-29.2.knots20251110.orig/cmake/script/GenerateBuildInfo.cmake bitcoin-29.2.knots20251110/cmake/script/GenerateBuildInfo.cmake
+--- bitcoin-29.2.knots20251110.orig/cmake/script/GenerateBuildInfo.cmake	2025-11-10 04:46:34.000000000 +0100
++++ bitcoin-29.2.knots20251110/cmake/script/GenerateBuildInfo.cmake	2026-05-12 16:28:51.830066436 +0200
+@@ -123,7 +123,7 @@
+ else()
+   # NOTE: The NEWINFO line below this comment gets replaced by a string-match in contrib/guix/libexec/make_release_tarball.sh
+   # If changing it, update the script too!
+-  set(NEWINFO [[#define BUILD_GIT_TAG "v29.2.knots20251110"]])
++  set(NEWINFO [[#define BUILD_GIT_TAG "v29.2"]])
+ endif()
+ 
+ # Only update the header if necessary.
+diff '--color=auto' -rub bitcoin-29.2.knots20251110.orig/src/clientversion.cpp bitcoin-29.2.knots20251110/src/clientversion.cpp
+--- bitcoin-29.2.knots20251110.orig/src/clientversion.cpp	2025-11-10 04:46:34.000000000 +0100
++++ bitcoin-29.2.knots20251110/src/clientversion.cpp	2026-05-12 16:28:09.410102615 +0200
+@@ -69,13 +69,6 @@
+     std::string comments_str;
+     if (!comments.empty()) comments_str = strprintf("(%s)", Join(comments, "; "));
+     std::string ua = strprintf("/%s:%s%s/", name, FormatVersion(nClientVersion), comments_str);
+-    if (!base_name_only) {
+-        static const auto ua_knots = []() -> std::string {
+-            const auto pos{CLIENT_BUILD.find(".knots")};
+-            return "Knots:" + CLIENT_BUILD.substr(pos + 6) + "/";
+-        }();
+-        ua += ua_knots;
+-    }
+     return ua;
+ }
+ 
+@@ -93,7 +86,7 @@
+ 
+ std::string LicenseInfo()
+ {
+-    const std::string URL_SOURCE_CODE = "<https://github.com/bitcoinknots/bitcoin>";
++    const std::string URL_SOURCE_CODE = "<https://github.com/bitcoincore/bitcoin>";
+ 
+     return CopyrightHolders(strprintf(_("Copyright (C) %i-%i"), 2009, COPYRIGHT_YEAR).translated + " ") + "\n" +
+            "\n" +
