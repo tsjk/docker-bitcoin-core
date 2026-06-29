@@ -107,7 +107,7 @@ RUN    wget https://bitcoincore.org/bin/bitcoin-core-${BITCOIN_VERSION}/SHA256SU
                             -DWITH_USDT=OFF \
                             -DBUILD_DAEMON=ON \
                             -DWITH_ZMQ=ON \
-                            $([ "${TARGETPLATFORM#*/}" != "amd64" ] || printf 'APPEND_CXXFLAGS=-I%s/include/ APPEND_LDFLAGS=-L%s/lib/' "${BERKELEYDB_PREFIX}" "${BERKELEYDB_PREFIX}") \
+                            $([ "${TARGETPLATFORM#*/}" != "amd64" ] || printf '-DAPPEND_CXXFLAGS=-I%s/include/ -DAPPEND_LDFLAGS=-L%s/lib/' "${BERKELEYDB_PREFIX}" "${BERKELEYDB_PREFIX}") \
          && cmake --build build -j$(nproc) \
          && cmake --install build \
        ) \
