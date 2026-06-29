@@ -69,7 +69,7 @@ RUN    gpg --verify SHA256SUMS.asc SHA256SUMS && rm -rf /root/.gnupg \
     && (    cd "/bitcoin-${BITCOIN_VERSION}" \
          && sed -i 's:sys/fcntl.h:fcntl.h:' src/compat/compat.h \
          && ./autogen.sh \
-         && ./configure LDFLAGS=-L`ls -d /opt/db*`/lib/ CPPFLAGS=-I`ls -d /opt/db*`/include/ \
+         && ./configure LDFLAGS=-L`ls -d /opt/db*`/lib/ CXXFLAGS=-I`ls -d /opt/db*`/include/ \
               --prefix="${BITCOIN_PREFIX}" \
               --mandir=/usr/share/man \
               --disable-tests \

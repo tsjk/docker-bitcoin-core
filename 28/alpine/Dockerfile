@@ -83,7 +83,7 @@ RUN    wget https://bitcoincore.org/bin/bitcoin-core-${BITCOIN_VERSION}/SHA256SU
          && sed -i 's:sys/fcntl.h:fcntl.h:' src/compat/compat.h \
          && ./autogen.sh \
          && { [ "${TARGETPLATFORM#*/}" != "amd64" ] || BERKELEYDB_PREFIX=$(ls -d /opt/db*); } \
-         && ./configure $([ "${TARGETPLATFORM#*/}" != "amd64" ] || printf 'LDFLAGS=-L%s/lib/ CPPFLAGS=-I%s/include/' "${BERKELEYDB_PREFIX}" "${BERKELEYDB_PREFIX}") \
+         && ./configure $([ "${TARGETPLATFORM#*/}" != "amd64" ] || printf 'LDFLAGS=-L%s/lib/ CXXFLAGS=-I%s/include/' "${BERKELEYDB_PREFIX}" "${BERKELEYDB_PREFIX}") \
               --prefix="${BITCOIN_PREFIX}" \
               --disable-tests \
               --disable-bench \

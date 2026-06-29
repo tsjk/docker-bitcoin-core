@@ -94,7 +94,7 @@ RUN    (    cd "/bitcoin-${BITCOIN_VERSION}" \
             }; } \
          && ./autogen.sh \
          && { [ "${TARGETPLATFORM#*/}" != "amd64" ] || BERKELEYDB_PREFIX=$(ls -d /opt/db*); } \
-         && ./configure $([ "${TARGETPLATFORM#*/}" != "amd64" ] || printf 'LDFLAGS=-L%s/lib/ CPPFLAGS=-I%s/include/' "${BERKELEYDB_PREFIX}" "${BERKELEYDB_PREFIX}") \
+         && ./configure $([ "${TARGETPLATFORM#*/}" != "amd64" ] || printf 'LDFLAGS=-L%s/lib/ CXXFLAGS=-I%s/include/' "${BERKELEYDB_PREFIX}" "${BERKELEYDB_PREFIX}") \
               --prefix="${BITCOIN_PREFIX}" \
               --disable-tests \
               --disable-bench \

@@ -80,7 +80,7 @@ WORKDIR /bitcoin-${BITCOIN_VERSION}
 
 RUN sed -i s:sys/fcntl.h:fcntl.h: src/compat/compat.h
 RUN ./autogen.sh
-RUN ./configure LDFLAGS=-L`ls -d /opt/db*`/lib/ CPPFLAGS=-I`ls -d /opt/db*`/include/ \
+RUN ./configure LDFLAGS=-L`ls -d /opt/db*`/lib/ CXXFLAGS=-I`ls -d /opt/db*`/include/ \
     --prefix=${BITCOIN_PREFIX} \
     --disable-tests \
     --disable-bench \
