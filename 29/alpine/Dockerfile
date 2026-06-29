@@ -84,7 +84,7 @@ RUN    wget https://bitcoincore.org/bin/bitcoin-core-${BITCOIN_VERSION}/SHA256SU
     && (    cd "/bitcoin-${BITCOIN_VERSION}" \
          && { [ "${TARGETPLATFORM#*/}" != "amd64" ] || BERKELEYDB_PREFIX=$(ls -d /opt/db*); } \
          && cmake -B build \
-                            -DCMAKE_BUILD_TYPE=Release \
+                            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
                             -DCMAKE_CXX_FLAGS_RELWITHDEBINFO="-O2 -g0" \
                             -DCMAKE_INSTALL_PREFIX:PATH="${BITCOIN_PREFIX}" \
                             -DBUILD_TESTS=OFF \
@@ -97,7 +97,7 @@ RUN    wget https://bitcoincore.org/bin/bitcoin-core-${BITCOIN_VERSION}/SHA256SU
                             -DENABLE_EXTERNAL_SIGNER=ON \
                             -DBUILD_UTIL=ON \
                             -DBUILD_TX=ON \
-                            $([ "${TARGETPLATFORM#*/}" != "amd64" ] || printf '-DWITH_BDB=ON -DBerkeleyDB_INCLUDE_DIR=%s/include -DBerkeleyDB_LIBRARY=%s/lib' "${BERKELEYDB_PREFIX}" "${BERKELEYDB_PREFIX}") \
+                            $([ "${TARGETPLATFORM#*/}" != "amd64" ] || printf '-DWITH_BDB=ON -DBerkeleyDB_INCLUDE_DIR=%s/include' "${BERKELEYDB_PREFIX}") \
                             -DWITH_SQLITE=ON \
                             -DENABLE_WALLET=ON \
                             -DBUILD_WALLET_TOOL=ON \
